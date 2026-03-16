@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export const metadata = {
   title: '送信完了',
   description: '資料ダウンロードのお申し込みを受け付けました。',
@@ -10,12 +12,10 @@ const TOP_URL = 'https://www.cocomarke.com/'
 
 type ThanksSearchParams = { ref?: string }
 
-export default async function ContactThanksPage({
-  searchParams,
-}: {
-  searchParams: ThanksSearchParams | Promise<ThanksSearchParams>
+export default async function ContactThanksPage(props: {
+  searchParams?: Promise<ThanksSearchParams>
 }) {
-  const params = await Promise.resolve(searchParams)
+  const params: ThanksSearchParams = await (props.searchParams ?? Promise.resolve({} as ThanksSearchParams))
   const ref = params?.ref
   const accountCheckHref = ref
     ? `${ACCOUNT_CHECK_URL}?ref=${encodeURIComponent(ref)}`
@@ -53,9 +53,11 @@ export default async function ContactThanksPage({
                 rel="noopener noreferrer"
                 className="block w-full"
               >
-                <img
+                <Image
                   src={BANNER_IMAGE_URL}
                   alt="無料アカウント診断"
+                  width={600}
+                  height={200}
                   className="w-full h-auto rounded-lg border border-gray-200 object-contain"
                 />
               </a>

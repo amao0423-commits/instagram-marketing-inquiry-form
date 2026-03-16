@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       file_type: body.file_type || null,
     }
     const supabase = getServerSupabase()
-    const { data, error } = await supabase.from('documents').insert(insert).select().single()
+    const { data, error } = await supabase.from('documents' as any).insert(insert as any).select().single()
 
     if (error) {
       console.error('[POST /api/admin/documents] Supabase error:', error.message, error)

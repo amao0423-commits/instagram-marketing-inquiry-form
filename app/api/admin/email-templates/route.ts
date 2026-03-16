@@ -41,10 +41,9 @@ export async function POST(_request: NextRequest) {
       .select('value')
       .eq('key', 'default_email_template_body_html')
       .single()
+    const rawValue = (setting as { value: string } | null)?.value
     const body_html =
-      setting?.value != null && setting.value !== ''
-        ? setting.value
-        : DEFAULT_EMAIL_TEMPLATE_BODY_HTML
+      rawValue != null && rawValue !== '' ? rawValue : DEFAULT_EMAIL_TEMPLATE_BODY_HTML
 
     const { data, error } = await supabase
       .from('email_templates')
