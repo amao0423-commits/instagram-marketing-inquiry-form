@@ -27,10 +27,15 @@ export default async function ContactThanksPage(props: {
         {/* 画面上部：御礼タイトルとメール確認本文（中央寄せ） */}
         <header className="text-center mb-10">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-            資料ダウンロードのお申し込みありがとうございます
+            資料ダウンロードのお申し込み
+            <br />
+            ありがとうございます。
           </h1>
           <p className="text-gray-600 leading-relaxed max-w-xl mx-auto">
-            ご入力いただいたメールアドレスに、資料のダウンロードURLをお送りいたしました。メールが届いていない場合は、アドレスの誤入力や、迷惑メールフォルダをご確認ください。
+            ご入力いただいたメールアドレスに、資料の
+            ダウンロードURLをお送りいたしました。
+            メールが届いていない場合は、アドレスのご入力や、
+            迷惑メールフォルダに入っている可能性がありますのでご確認ください。
           </p>
         </header>
 
@@ -38,7 +43,7 @@ export default async function ContactThanksPage(props: {
         <section className="bg-slate-50 rounded-xl p-4 sm:p-5 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 items-center">
             {/* 左：次のステップを促すテキスト（2行で表示） */}
-            <div className="order-2 md:order-1">
+            <div className="order-2 md:order-1 text-center md:text-left">
               <p className="text-base sm:text-lg text-gray-800 leading-snug font-medium">
                 まずは現在のアカウント状況をチェックしてみませんか？
                 <br />
@@ -68,7 +73,7 @@ export default async function ContactThanksPage(props: {
         {/* フッター：お問い合わせテキスト＋トップへ戻るボタン */}
         <footer className="text-center">
           <p className="text-gray-600 mb-8 leading-relaxed">
-            サービス内容について詳しく知りたい方は{' '}
+            サービス内容について詳しく知りたい方は
             <a
               href={CONTACT_URL}
               target="_blank"
@@ -76,7 +81,8 @@ export default async function ContactThanksPage(props: {
               className="text-blue-600 hover:underline font-medium"
             >
               こちらのお問い合わせフォーム
-            </a>{' '}
+            </a>
+            <br />
             よりお気軽にご相談ください。
           </p>
           <div className="flex justify-center">
