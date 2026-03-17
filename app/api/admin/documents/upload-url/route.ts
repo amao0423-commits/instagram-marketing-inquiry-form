@@ -1,3 +1,9 @@
+/**
+ * 署名付きアップロードURL取得API
+ * - このAPIはファイル本体を受け取らず、file_name / file_size / file_type のみ JSON で受け取る。
+ * - クライアントは返却された upload_url へブラウザから直接 PUT するため、
+ *   ファイルは Vercel を経由せず Supabase Storage に直送され、Vercel の body 制限の影響を受けない。
+ */
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedUser } from '@/lib/auth'
 import { getServerSupabase } from '@/lib/supabase-server'
