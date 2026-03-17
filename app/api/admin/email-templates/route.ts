@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedUser } from '@/lib/auth'
 import { getServerSupabase } from '@/lib/supabase-server'
 import { DEFAULT_EMAIL_TEMPLATE_BODY_HTML } from '@/lib/email-template-defaults'
+import type { Database } from '@/types/database.types'
+
+type EmailTemplateInsert = Database['public']['Tables']['email_templates']['Insert']
 
 export async function GET(_request: NextRequest) {
   try {
@@ -45,17 +48,18 @@ export async function POST(_request: NextRequest) {
     const body_html =
       rawValue != null && rawValue !== '' ? rawValue : DEFAULT_EMAIL_TEMPLATE_BODY_HTML
 
+    const payload: EmailTemplateInsert = {
+      subject: '',
+      body_html,
+      download_url: '',
+      document_type: null,
+      document_links: [],
+      is_published: false,
+    }
+
     const { data, error } = await supabase
       .from('email_templates')
-      // @ts-expect-error - Supabase の型推論で insert が never になるため
-      .insert({
-        subject: '',
-        body_html,
-        download_url: '',
-        document_type: null,
-        document_links: [],
-        is_published: false,
-      })
+      .insert(payload)
       .select()
       .single()
 
