@@ -12,11 +12,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: '認証が必要です' }, { status: 401 })
     }
     const supabase = getServerSupabase()
-    const { data } = await supabase
+    const { data: raw } = await supabase
       .from('site_settings')
       .select('value')
       .eq('key', KEY)
       .single()
+    const data = raw as { value: string } | null
 
     const body_html =
       data?.value != null && data.value !== '' ? data.value : null
@@ -54,6 +55,7 @@ export async function PATCH(request: NextRequest) {
     const supabase = getServerSupabase()
     const { error } = await supabase
       .from('site_settings')
+      // @ts-expect-error - Supabase の型推論で upsert が never になるため
       .upsert({ key: KEY, value: body_html }, { onConflict: 'key' })
 
     if (error) {

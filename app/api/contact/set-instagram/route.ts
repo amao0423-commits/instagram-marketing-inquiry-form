@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
     const supabase = getServerSupabase()
     const { error } = await supabase
       .from('leads')
+      // @ts-expect-error - Supabase の型推論で update が never になるため
       .update({
         instagram_id: instagram_id.trim(),
         updated_at: new Date().toISOString(),

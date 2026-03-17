@@ -47,6 +47,7 @@ export async function POST(_request: NextRequest) {
 
     const { data, error } = await supabase
       .from('email_templates')
+      // @ts-expect-error - Supabase の型推論で insert が never になるため
       .insert({
         subject: '',
         body_html,

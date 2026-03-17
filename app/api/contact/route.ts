@@ -122,6 +122,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+    type LeadRow = Database['public']['Tables']['leads']['Row']
+    const lead = leadData as LeadRow
 
     const { data: templateData, error: templateError } = await supabase
       .from('email_templates')
@@ -159,10 +161,12 @@ export async function POST(request: NextRequest) {
     let documentButtons = ''
     if (template.document_links && Array.isArray(template.document_links) && template.document_links.length > 0) {
       const documentIds = template.document_links.map(link => link.document_id)
-      const { data: documents } = await supabase
+      const { data: documentsRaw } = await supabase
         .from('documents')
         .select('*')
         .in('id', documentIds)
+      type DocumentRow = Database['public']['Tables']['documents']['Row']
+      const documents = documentsRaw as DocumentRow[] | null
 
       if (documents && documents.length > 0) {
         const docMap = new Map(documents.map(doc => [doc.id, doc]))
@@ -192,7 +196,7 @@ export async function POST(request: NextRequest) {
       console.error('SendGrid が設定されていないため、メール送信をスキップします')
       let ref: string | undefined
       try {
-        ref = createLeadRefToken(leadData.id)
+        ref = createLeadRefToken(lead.id)
       } catch {
         // INSTAGRAM_REF_SECRET 未設定時は ref なし
       }
@@ -223,7 +227,7 @@ export async function POST(request: NextRequest) {
 
     let ref: string | undefined
     try {
-      ref = createLeadRefToken(leadData.id)
+      ref = createLeadRefToken(lead.id)
     } catch {
       // INSTAGRAM_REF_SECRET 未設定時は ref なし
     }
