@@ -131,6 +131,11 @@
     "unpublishConfirm": "このテンプレートをフォームの選択肢から外します。よろしいですか？",
     "unpublishSuccess": "登録をやめました。フォームの選択肢から外れました。",
     "unpublishFailed": "登録の解除に失敗しました",
+    "deleteFromList": "リストから削除",
+    "deleteConfirm": "このテンプレートを一覧から削除します。よろしいですか？",
+    "deleteSuccess": "テンプレートを削除しました",
+    "deleteFailed": "削除に失敗しました",
+    "deleting": "削除中...",
     "createFailed": "新規作成に失敗しました",
     "createSuccess": "新しいテンプレートを作成しました。件名・資料タイプ・紐づける資料を設定して保存してください。"
   },

@@ -45,19 +45,19 @@ export default async function ContactThanksPage(props: {
                 30秒で終わる無料アカウント診断もぜひご活用ください。
               </p>
             </div>
-            {/* 右：バナー画像（セクション幅の半分程度の印象） */}
-            <div className="order-1 md:order-2">
+            {/* 右：バナー画像（拡大させず元サイズで表示） */}
+            <div className="order-1 md:order-2 max-w-[396px] w-full mx-auto md:mx-0 md:ml-auto">
               <a
                 href={accountCheckHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full"
+                className="block"
               >
                 <Image
                   src={BANNER_IMAGE_URL}
                   alt="無料アカウント診断"
-                  width={600}
-                  height={200}
+                  width={396}
+                  height={280}
                   className="w-full h-auto rounded-lg border border-gray-200 object-contain"
                 />
               </a>

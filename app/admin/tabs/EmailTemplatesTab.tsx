@@ -29,6 +29,7 @@ export default function EmailTemplatesTab() {
     is_published: false,
   })
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [copyFeedback, setCopyFeedback] = useState(false)
   const [copiedDocId, setCopiedDocId] = useState<string | null>(null)
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
@@ -226,6 +227,27 @@ export default function EmailTemplatesTab() {
       setMessage({ type: 'error', text: (data.message as string) ?? t('emailTemplates.unpublishFailed') })
     }
     setSaving(false)
+  }
+
+  const handleDeleteFromList = async () => {
+    if (!selected) return
+    if (!window.confirm(t('emailTemplates.deleteConfirm'))) return
+
+    setDeleting(true)
+    setMessage(null)
+    const res = await fetch(`/api/admin/email-templates/${selected.id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+    if (res.ok) {
+      setMessage({ type: 'success', text: t('emailTemplates.deleteSuccess') })
+      setSelected(null)
+      await fetchTemplates()
+    } else {
+      const data = await res.json().catch(() => ({}))
+      setMessage({ type: 'error', text: (data.message as string) ?? t('emailTemplates.deleteFailed') })
+    }
+    setDeleting(false)
   }
 
   const handleCopyTemplate = async () => {
@@ -540,6 +562,14 @@ export default function EmailTemplatesTab() {
                     {t('emailTemplates.unpublish')}
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={handleDeleteFromList}
+                  disabled={saving || deleting}
+                  className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg font-medium disabled:opacity-50 transition-colors"
+                >
+                  {deleting ? t('emailTemplates.deleting') : t('emailTemplates.deleteFromList')}
+                </button>
                 <button
                   type="button"
                   onClick={handleCopyTemplate}

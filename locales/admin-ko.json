@@ -131,6 +131,11 @@
     "unpublishConfirm": "이 템플릿을 폼 선택지에서 제외할까요?",
     "unpublishSuccess": "등록을 해제했습니다. 폼 선택지에서 제외되었습니다.",
     "unpublishFailed": "등록 해제에 실패했습니다",
+    "deleteFromList": "목록에서 삭제",
+    "deleteConfirm": "이 템플릿을 목록에서 삭제할까요?",
+    "deleteSuccess": "템플릿을 삭제했습니다",
+    "deleteFailed": "삭제에 실패했습니다",
+    "deleting": "삭제 중...",
     "createFailed": "새로 만들기에 실패했습니다",
     "createSuccess": "새 템플릿을 만들었습니다. 제목·자료 유형·연결할 자료를 설정한 뒤 저장해 주세요."
   },
