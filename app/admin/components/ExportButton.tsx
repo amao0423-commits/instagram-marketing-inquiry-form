@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useAdminLocale } from '../context/AdminLocaleContext'
 
 interface ExportButtonProps {
   statusFilter: string
@@ -9,6 +10,7 @@ interface ExportButtonProps {
 }
 
 export default function ExportButton({ statusFilter, dateFrom, dateTo }: ExportButtonProps) {
+  const { t } = useAdminLocale()
   const [loading, setLoading] = useState(false)
 
   const handleExport = async () => {
@@ -46,7 +48,7 @@ export default function ExportButton({ statusFilter, dateFrom, dateTo }: ExportB
       disabled={loading}
       className="px-4 py-2 bg-white border border-gray-300 rounded text-gray-700 text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
     >
-      {loading ? 'エクスポート中...' : 'CSVエクスポート'}
+      {loading ? t('export.exporting') : t('export.button')}
     </button>
   )
 }

@@ -8,12 +8,14 @@ import StatusSelector from '../components/StatusSelector'
 import FilterBar from '../components/FilterBar'
 import ExportButton from '../components/ExportButton'
 import MemoEditor from '../components/MemoEditor'
+import { useAdminLocale } from '../context/AdminLocaleContext'
 
 type Lead = Database['public']['Tables']['leads']['Row']
 
 const PAGE_SIZE = 50
 
 export default function AdminLeadsPage() {
+  const { t, locale } = useAdminLocale()
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [notification, setNotification] = useState<string | null>(null)
@@ -40,16 +42,16 @@ export default function AdminLeadsPage() {
   }, [])
 
   const showNotification = useCallback((lead: Lead) => {
-    setNotification(`新しいお問い合わせ: ${lead.name}様 (${lead.category})`)
+    setNotification(`${t('leads.newInquiry')}: ${lead.name} (${lead.category})`)
     setTimeout(() => setNotification(null), 5000)
     if (notificationPermission === 'granted' && typeof window !== 'undefined' && 'Notification' in window) {
-      new Notification('新しいお問い合わせ', {
-        body: `${lead.name}様から${lead.category}のお問い合わせがありました`,
+      new Notification(t('leads.newInquiry'), {
+        body: t('leads.newInquiryBody', { name: lead.name, category: lead.category }),
         icon: '/favicon.ico',
         tag: lead.id,
       })
     }
-  }, [notificationPermission])
+  }, [notificationPermission, t])
 
   const fetchLeads = useCallback(async () => {
     const res = await fetch('/api/admin/leads', { credentials: 'include' })
@@ -141,7 +143,7 @@ export default function AdminLeadsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-xl text-gray-600">読み込み中...</div>
+        <div className="text-xl text-gray-600">{t('common.loading')}</div>
       </div>
     )
   }
@@ -163,27 +165,27 @@ export default function AdminLeadsPage() {
                 onClick={handleLogout}
                 className="px-4 py-2 border border-gray-300 rounded text-gray-700 text-sm font-medium hover:bg-gray-50"
               >
-                ログアウト
+                {t('admin.logout')}
               </button>
             </>
           }
         />
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-900">お問い合わせ一覧</h1>
-          <p className="text-gray-600 text-sm mt-1">受付した問い合わせの確認・対応</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('leads.title')}</h1>
+          <p className="text-gray-600 text-sm mt-1">{t('leads.subtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-gray-500 uppercase">総件数</p>
+            <p className="text-xs font-medium text-gray-500 uppercase">{t('leads.totalCount')}</p>
             <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
           </div>
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-gray-500 uppercase">未対応</p>
+            <p className="text-xs font-medium text-gray-500 uppercase">{t('leads.uncounted')}</p>
             <p className="text-2xl font-bold text-gray-900">{stats.unpaid}</p>
           </div>
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-gray-500 uppercase">本日の件数</p>
+            <p className="text-xs font-medium text-gray-500 uppercase">{t('leads.todayCount')}</p>
             <p className="text-2xl font-bold text-gray-900">{stats.today}</p>
           </div>
         </div>
@@ -195,12 +197,12 @@ export default function AdminLeadsPage() {
         )}
         {notificationPermission === 'denied' && (
           <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded text-yellow-800 text-sm">
-            デスクトップ通知が無効です。ブラウザ設定で許可してください。
+            {t('leads.notificationDenied')}
           </div>
         )}
         {notificationPermission === 'default' && (
           <div className="mb-4 bg-blue-50 border-l-4 border-blue-500 p-4 rounded text-blue-800 text-sm">
-            デスクトップ通知を有効にすると新着を見逃しません。
+            {t('leads.notificationHint')}
           </div>
         )}
 
@@ -232,21 +234,21 @@ export default function AdminLeadsPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">受付日時</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">名前</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">カテゴリ</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">会社名</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">メール</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">電話</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">ステータス</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">メモ</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.receivedAt')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.name')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.category')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.company')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.email')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.phone')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.status')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.memo')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {paginatedLeads.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
-                      該当するお問い合わせがありません
+                      {t('leads.noLeads')}
                     </td>
                   </tr>
                 ) : (
@@ -257,7 +259,7 @@ export default function AdminLeadsPage() {
                       onClick={() => setDetailLead(lead)}
                     >
                       <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
-                        {new Date(lead.created_at).toLocaleString('ja-JP')}
+                        {new Date(lead.created_at).toLocaleString(locale === 'ko' ? 'ko-KR' : 'ja-JP')}
                       </td>
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">{lead.name}</td>
                       <td className="px-4 py-3 text-sm text-gray-900">
@@ -297,7 +299,11 @@ export default function AdminLeadsPage() {
 
         <div className="mt-4 flex items-center justify-between">
           <p className="text-sm text-gray-500">
-            表示 {filteredLeads.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filteredLeads.length)} / 全 {filteredLeads.length} 件
+            {t('leads.displayRange', {
+              from: String(filteredLeads.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1),
+              to: String(Math.min(page * PAGE_SIZE, filteredLeads.length)),
+              total: String(filteredLeads.length),
+            })}
           </p>
           <div className="flex gap-2">
             <button
@@ -306,7 +312,7 @@ export default function AdminLeadsPage() {
               onClick={() => setPage((p) => p - 1)}
               className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              前へ
+              {t('leads.prev')}
             </button>
             <button
               type="button"
@@ -314,7 +320,7 @@ export default function AdminLeadsPage() {
               onClick={() => setPage((p) => p + 1)}
               className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              次へ
+              {t('leads.next')}
             </button>
           </div>
         </div>

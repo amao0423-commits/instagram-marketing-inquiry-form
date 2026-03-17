@@ -2,10 +2,12 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import type { Database } from '@/types/database.types'
+import { useAdminLocale } from '../context/AdminLocaleContext'
 
 type Document = Database['public']['Tables']['documents']['Row']
 
 export default function DocumentsTab() {
+  const { t } = useAdminLocale()
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
@@ -24,12 +26,12 @@ export default function DocumentsTab() {
       return
     }
     if (!res.ok) {
-      setMessage({ type: 'error', text: '資料の取得に失敗しました' })
+      setMessage({ type: 'error', text: t('documents.fetchFailed') })
       return
     }
     const data = await res.json()
     setDocuments(Array.isArray(data) ? data : [])
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchDocuments().finally(() => setLoading(false))
@@ -51,11 +53,11 @@ export default function DocumentsTab() {
 
   const handleUpload = async () => {
     if (!uploadTitle.trim()) {
-      setMessage({ type: 'error', text: '資料名を入力してください' })
+      setMessage({ type: 'error', text: t('documents.docNameEmpty') })
       return
     }
     if (!selectedFile) {
-      setMessage({ type: 'error', text: 'ファイルを選択してください' })
+      setMessage({ type: 'error', text: t('documents.fileEmpty') })
       return
     }
 
@@ -77,7 +79,7 @@ export default function DocumentsTab() {
 
       if (!urlRes.ok) {
         const errorData = await urlRes.json().catch(() => ({}))
-        setMessage({ type: 'error', text: errorData.message ?? 'アップロードの準備に失敗しました' })
+        setMessage({ type: 'error', text: errorData.message ?? t('documents.uploadUrlFailed') })
         return
       }
 
@@ -91,7 +93,7 @@ export default function DocumentsTab() {
       })
 
       if (!putRes.ok) {
-        setMessage({ type: 'error', text: 'ファイルのアップロードに失敗しました' })
+        setMessage({ type: 'error', text: t('documents.uploadFailed') })
         return
       }
 
@@ -111,11 +113,11 @@ export default function DocumentsTab() {
 
       if (!createRes.ok) {
         const errorData = await createRes.json().catch(() => ({}))
-        setMessage({ type: 'error', text: errorData.message ?? '資料の作成に失敗しました' })
+        setMessage({ type: 'error', text: errorData.message ?? t('documents.createFailed') })
         return
       }
 
-      setMessage({ type: 'success', text: '資料をアップロードしました' })
+      setMessage({ type: 'success', text: t('documents.uploadSuccess') })
       setShowUploadModal(false)
       await fetchDocuments()
     } finally {
@@ -124,7 +126,7 @@ export default function DocumentsTab() {
   }
 
   const handleDelete = async (doc: Document) => {
-    if (!window.confirm(`「${doc.title}」を削除してもよろしいですか？`)) return
+    if (!window.confirm(t('documents.deleteConfirm', { title: doc.title }))) return
     setDeletingId(doc.id)
     setMessage(null)
     try {
@@ -134,10 +136,10 @@ export default function DocumentsTab() {
       })
       if (res.ok) {
         setDocuments((prev) => prev.filter((d) => d.id !== doc.id))
-        setMessage({ type: 'success', text: '削除しました' })
+        setMessage({ type: 'success', text: t('documents.deleteSuccess') })
       } else {
         const data = await res.json().catch(() => ({}))
-        setMessage({ type: 'error', text: (data.message as string) ?? '削除に失敗しました' })
+        setMessage({ type: 'error', text: (data.message as string) ?? t('documents.deleteFailed') })
       }
     } finally {
       setDeletingId(null)
@@ -166,19 +168,19 @@ export default function DocumentsTab() {
     if (mimeType === 'application/pdf') return 'PDF'
     if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return 'PowerPoint'
     if (mimeType.includes('word') || mimeType.includes('document')) return 'Word'
-    if (mimeType.includes('image')) return '画像'
-    return 'その他'
+    if (mimeType.includes('image')) return t('documents.typeImage')
+    return t('documents.typeOther')
   }
 
   return (
     <div className="p-6">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">資料管理</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('documents.title')}</h2>
         <button
           onClick={handleUploadClick}
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
         >
-          資料をアップロード
+          {t('documents.upload')}
         </button>
       </div>
 
@@ -195,7 +197,7 @@ export default function DocumentsTab() {
       <div className="mb-6">
         <input
           type="text"
-          placeholder="資料名またはファイル名で検索..."
+          placeholder={t('documents.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -203,10 +205,10 @@ export default function DocumentsTab() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">読み込み中...</div>
+        <div className="text-center py-12 text-gray-500">{t('documents.loading')}</div>
       ) : filteredDocuments.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
-          {searchQuery ? '検索条件に一致する資料がありません' : '資料がありません'}
+          {searchQuery ? t('documents.noMatch') : t('documents.noDocuments')}
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -214,22 +216,22 @@ export default function DocumentsTab() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  資料名
+                  {t('documents.docName')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ファイル名
+                  {t('documents.fileName')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  種別
+                  {t('documents.type')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  サイズ
+                  {t('documents.size')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  登録日
+                  {t('documents.registeredAt')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  操作
+                  {t('documents.actions')}
                 </th>
               </tr>
             </thead>
@@ -250,7 +252,7 @@ export default function DocumentsTab() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatFileSize(doc.file_size)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(doc.created_at).toLocaleDateString('ja-JP')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -261,7 +263,7 @@ export default function DocumentsTab() {
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-900 mr-4"
                       >
-                        ダウンロード
+                        {t('documents.download')}
                       </a>
                     )}
                     <button
@@ -269,7 +271,7 @@ export default function DocumentsTab() {
                       disabled={deletingId === doc.id}
                       className="text-red-600 hover:text-red-900 disabled:opacity-50"
                     >
-                      {deletingId === doc.id ? '削除中...' : '削除'}
+                      {deletingId === doc.id ? t('documents.deleting') : t('documents.delete')}
                     </button>
                   </td>
                 </tr>
@@ -282,24 +284,24 @@ export default function DocumentsTab() {
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">資料をアップロード</h2>
+            <h2 className="text-xl font-bold mb-4">{t('documents.uploadModalTitle')}</h2>
             
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                資料名 <span className="text-red-500">*</span>
+                {t('documents.docNameRequired')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={uploadTitle}
                 onChange={(e) => setUploadTitle(e.target.value)}
-                placeholder="例: リポストサービス紹介資料"
+                placeholder={t('documents.docNamePlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                ファイル <span className="text-red-500">*</span>
+                {t('documents.fileRequired')} <span className="text-red-500">*</span>
               </label>
               <input
                 ref={fileInputRef}
@@ -309,11 +311,11 @@ export default function DocumentsTab() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <p className="mt-1 text-xs text-gray-500">
-                対応形式: PDF, PowerPoint, 画像（JPG/PNG）, Word（最大50MB）
+                {t('documents.formats')}
               </p>
               {selectedFile && (
                 <p className="mt-2 text-sm text-gray-700">
-                  選択中: {selectedFile.name} ({formatFileSize(selectedFile.size)})
+                  {t('documents.selectingFile')}: {selectedFile.name} ({formatFileSize(selectedFile.size)})
                 </p>
               )}
             </div>
@@ -324,14 +326,14 @@ export default function DocumentsTab() {
                 disabled={uploading}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50"
               >
-                キャンセル
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleUpload}
                 disabled={uploading}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                {uploading ? 'アップロード中...' : 'アップロード'}
+                {uploading ? t('documents.uploading') : t('documents.uploadButton')}
               </button>
             </div>
           </div>

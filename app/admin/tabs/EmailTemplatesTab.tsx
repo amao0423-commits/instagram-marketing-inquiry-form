@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import type { Database, DocumentLink } from '@/types/database.types'
+import { useAdminLocale } from '../context/AdminLocaleContext'
 
 type EmailTemplate = Database['public']['Tables']['email_templates']['Row']
 type Document = Database['public']['Tables']['documents']['Row']
@@ -16,6 +17,7 @@ function escapeHtml(s: string): string {
 }
 
 export default function EmailTemplatesTab() {
+  const { t } = useAdminLocale()
   const [templates, setTemplates] = useState<EmailTemplate[]>([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<EmailTemplate | null>(null)
@@ -114,10 +116,10 @@ export default function EmailTemplatesTab() {
       body: JSON.stringify({ body_html: defaultTemplateBody }),
     })
     if (res.ok) {
-      setDefaultTemplateMessage({ type: 'success', text: '初期テンプレートを保存しました。今後「新規作成」でこの内容が使われます。' })
+      setDefaultTemplateMessage({ type: 'success', text: t('emailTemplates.defaultSaved') })
     } else {
       const data = await res.json().catch(() => ({}))
-      setDefaultTemplateMessage({ type: 'error', text: (data.message as string) ?? '保存に失敗しました' })
+      setDefaultTemplateMessage({ type: 'error', text: (data.message as string) ?? t('emailTemplates.saveFailed') })
     }
     setDefaultTemplateSaving(false)
   }
@@ -161,7 +163,7 @@ export default function EmailTemplatesTab() {
       }),
     })
     if (res.ok) {
-      setMessage({ type: 'success', text: '保存しました' })
+      setMessage({ type: 'success', text: t('emailTemplates.saveSuccess') })
       await fetchTemplates()
     } else {
       const data = await res.json().catch(() => ({}))
@@ -173,13 +175,13 @@ export default function EmailTemplatesTab() {
   const handlePublish = async () => {
     if (!selected) return
     if (!form.document_type || !form.document_type.trim()) {
-      setMessage({ type: 'error', text: '資料タイプを入力してから登録確定してください' })
+      setMessage({ type: 'error', text: t('emailTemplates.documentTypeRequired') })
       return
     }
 
     const document_links: DocumentLink[] = selectedDocIds.map(docId => ({
       document_id: docId,
-      label: documentLabels[docId] || documents.find(d => d.id === docId)?.title || '資料を開く'
+      label: documentLabels[docId] || documents.find(d => d.id === docId)?.title || t('emailTemplates.openDocument')
     }))
 
     setSaving(true)
@@ -195,18 +197,18 @@ export default function EmailTemplatesTab() {
       }),
     })
     if (res.ok) {
-      setMessage({ type: 'success', text: '登録確定しました。フォームの選択肢に表示されます。' })
+      setMessage({ type: 'success', text: t('emailTemplates.publishSuccess') })
       await fetchTemplates()
     } else {
       const data = await res.json().catch(() => ({}))
-      setMessage({ type: 'error', text: (data.message as string) ?? '登録確定に失敗しました' })
+      setMessage({ type: 'error', text: (data.message as string) ?? t('emailTemplates.publishFailed') })
     }
     setSaving(false)
   }
 
   const handleUnpublish = async () => {
     if (!selected) return
-    if (!window.confirm('このテンプレートをフォームの選択肢から外します。よろしいですか？')) return
+    if (!window.confirm(t('emailTemplates.unpublishConfirm'))) return
 
     setSaving(true)
     setMessage(null)
@@ -217,11 +219,11 @@ export default function EmailTemplatesTab() {
       body: JSON.stringify({ is_published: false }),
     })
     if (res.ok) {
-      setMessage({ type: 'success', text: '登録をやめました。フォームの選択肢から外れました。' })
+      setMessage({ type: 'success', text: t('emailTemplates.unpublishSuccess') })
       await fetchTemplates()
     } else {
       const data = await res.json().catch(() => ({}))
-      setMessage({ type: 'error', text: (data.message as string) ?? '登録の解除に失敗しました' })
+      setMessage({ type: 'error', text: (data.message as string) ?? t('emailTemplates.unpublishFailed') })
     }
     setSaving(false)
   }
@@ -247,21 +249,21 @@ export default function EmailTemplatesTab() {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        setMessage({ type: 'error', text: (err.message as string) ?? '新規作成に失敗しました' })
+        setMessage({ type: 'error', text: (err.message as string) ?? t('emailTemplates.createFailed') })
         return
       }
       const newTemplate = (await res.json()) as EmailTemplate
       setTemplates(prev => [newTemplate, ...prev])
       setSelected(newTemplate)
-      setMessage({ type: 'success', text: '新しいテンプレートを作成しました。件名・資料タイプ・紐づける資料を設定して保存してください。' })
+      setMessage({ type: 'success', text: t('emailTemplates.createSuccess') })
     } catch {
-      setMessage({ type: 'error', text: '新規作成に失敗しました' })
+      setMessage({ type: 'error', text: t('emailTemplates.createFailed') })
     }
   }
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900">メールテンプレート</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-900">{t('emailTemplates.title')}</h2>
 
       {message && (
         <div
@@ -279,7 +281,7 @@ export default function EmailTemplatesTab() {
           onClick={() => setShowDefaultTemplateSection(prev => !prev)}
           className="w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         >
-          <span>新規作成時に使う初期テンプレートを変更する</span>
+          <span>{t('emailTemplates.defaultSection')}</span>
           <span className="text-gray-400">{showDefaultTemplateSection ? '▲' : '▼'}</span>
         </button>
         {showDefaultTemplateSection && (
@@ -294,7 +296,7 @@ export default function EmailTemplatesTab() {
               </div>
             )}
             <p className="text-xs text-gray-600 mb-2">
-              ここで編集したHTMLは、今後「新規作成」したテンプレートの初期本文として使われます。プレースホルダ {'{{documentButtons}}'} を入れておくと、各テンプレートで紐づけた資料のボタンが自動で入ります。
+              {t('emailTemplates.defaultHint')}
             </p>
             <textarea
               value={defaultTemplateBody}
@@ -309,7 +311,7 @@ export default function EmailTemplatesTab() {
                 disabled={defaultTemplateSaving}
                 className="px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
               >
-                {defaultTemplateSaving ? '保存中...' : '初期テンプレートを保存'}
+                {defaultTemplateSaving ? t('emailTemplates.savingDefault') : t('emailTemplates.saveDefault')}
               </button>
             </div>
           </div>
@@ -319,38 +321,38 @@ export default function EmailTemplatesTab() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">テンプレート一覧</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('emailTemplates.listTitle')}</h3>
             <button
               type="button"
               onClick={handleCreateNew}
               className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
             >
-              新規作成
+              {t('emailTemplates.createNew')}
             </button>
           </div>
           {loading ? (
-            <div className="text-gray-500">読み込み中...</div>
+            <div className="text-gray-500">{t('emailTemplates.loading')}</div>
           ) : templates.length === 0 ? (
-            <div className="text-gray-500">テンプレートがありません</div>
+            <div className="text-gray-500">{t('emailTemplates.noTemplates')}</div>
           ) : (
             <div className="space-y-2">
-              {templates.map((t) => (
+              {templates.map((tmpl) => (
                 <button
-                  key={t.id}
-                  onClick={() => setSelected(t)}
+                  key={tmpl.id}
+                  onClick={() => setSelected(tmpl)}
                   className={`w-full text-left p-4 rounded-lg border transition-colors ${
-                    selected?.id === t.id
+                    selected?.id === tmpl.id
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}
                 >
-                  <div className="font-medium text-gray-900">{t.subject || '（件名なし）'}</div>
+                  <div className="font-medium text-gray-900">{tmpl.subject || t('emailTemplates.subjectEmpty')}</div>
                   <div className="text-sm text-gray-500 mt-1">
-                    {t.document_type || '（資料タイプ未設定）'}
+                    {tmpl.document_type || t('emailTemplates.documentTypeUnset')}
                   </div>
-                  {t.is_published && (
+                  {tmpl.is_published && (
                     <span className="inline-block mt-2 px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-800">
-                      登録確定済み
+                      {t('emailTemplates.published')}
                     </span>
                   )}
                 </button>
@@ -362,12 +364,12 @@ export default function EmailTemplatesTab() {
         <div className="lg:col-span-2">
           {!selected ? (
             <div className="bg-white p-8 rounded-lg shadow text-center text-gray-500">
-              左側からテンプレートを選択してください
+              {t('emailTemplates.selectPrompt')}
             </div>
           ) : (
             <form onSubmit={handleSave} className="bg-white p-6 rounded-lg shadow space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">件名</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('emailTemplates.subject')}</label>
                 <input
                   type="text"
                   value={form.subject}
@@ -378,28 +380,28 @@ export default function EmailTemplatesTab() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  資料タイプ（フォームの選択肢名）<span className="text-red-500">*</span>
+                  {t('emailTemplates.documentType')}<span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={form.document_type}
                   onChange={(e) => setForm({ ...form, document_type: e.target.value })}
-                  placeholder="例: リポストサービス"
+                  placeholder={t('emailTemplates.documentTypePlaceholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  フォームの「ご希望資料」に表示される選択肢名です。登録確定前に必ず入力してください。
+                  {t('emailTemplates.documentTypeHint')}
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  紐づける資料（複数選択可）
+                  {t('emailTemplates.linkDocuments')}
                 </label>
                 {documentsLoading ? (
-                  <div className="text-gray-500 text-sm">資料を読み込み中...</div>
+                  <div className="text-gray-500 text-sm">{t('emailTemplates.documentsLoading')}</div>
                 ) : documents.length === 0 ? (
-                  <div className="text-gray-500 text-sm">資料がありません</div>
+                  <div className="text-gray-500 text-sm">{t('emailTemplates.noDocuments')}</div>
                 ) : (
                   <div className="space-y-3 border border-gray-300 rounded-lg p-4 max-h-96 overflow-y-auto">
                     {documents.map(doc => {
@@ -420,19 +422,19 @@ export default function EmailTemplatesTab() {
                                 <div className="mt-2 space-y-2">
                                   <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                                      ボタン表示名
+                                      {t('emailTemplates.buttonLabel')}
                                     </label>
                                     <input
                                       type="text"
                                       value={documentLabels[doc.id] || ''}
                                       onChange={(e) => handleLabelChange(doc.id, e.target.value)}
-                                      placeholder={`例: ${doc.title}を開く`}
+                                      placeholder={t('emailTemplates.buttonLabelPlaceholder', { title: doc.title })}
                                       className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                                     />
                                   </div>
                                   <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                                      公開URL
+                                      {t('emailTemplates.publicUrl')}
                                     </label>
                                     {doc.download_url ? (
                                       <div className="flex gap-2 items-center">
@@ -453,17 +455,17 @@ export default function EmailTemplatesTab() {
                                               setCopiedDocId(doc.id)
                                               setTimeout(() => setCopiedDocId(null), 2000)
                                             } catch {
-                                              setMessage({ type: 'error', text: 'コピーに失敗しました' })
+                                              setMessage({ type: 'error', text: t('emailTemplates.copyFailed') })
                                             }
                                           }}
                                           className="shrink-0 px-3 py-1 text-sm bg-gray-600 hover:bg-gray-700 text-white rounded font-medium transition-colors"
                                         >
-                                          {copiedDocId === doc.id ? 'コピーしました' : 'URLをコピー'}
+                                          {copiedDocId === doc.id ? t('emailTemplates.copied') : t('emailTemplates.copyUrl')}
                                         </button>
                                       </div>
                                     ) : (
                                       <p className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded">
-                                        公開URLが設定されていません（資料の再アップロードが必要です）
+                                        {t('emailTemplates.noPublicUrl')}
                                       </p>
                                     )}
                                   </div>
@@ -479,7 +481,7 @@ export default function EmailTemplatesTab() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">本文（HTML）</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('emailTemplates.bodyHtml')}</label>
                 <textarea
                   value={form.body_html}
                   onChange={(e) => setForm({ ...form, body_html: e.target.value })}
@@ -487,23 +489,23 @@ export default function EmailTemplatesTab() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  テキスト部分だけ書き換えればOK。プレースホルダ: {'{{name}}'}, {'{{documentButtons}}'}（紐づけた資料のボタンが自動で入ります）
+                  {t('emailTemplates.bodyHint')}
                 </p>
                 <div className="mt-4">
-                  <p className="text-sm font-medium text-gray-700 mb-2">プレビュー</p>
+                  <p className="text-sm font-medium text-gray-700 mb-2">{t('emailTemplates.preview')}</p>
                   <div className="border border-gray-300 rounded-lg bg-gray-100 overflow-hidden">
                     <iframe
-                      title="メール本文プレビュー"
+                      title={t('emailTemplates.previewTitle')}
                       srcDoc={(() => {
                         const previewButtons = selectedDocIds
                           .map(docId => {
-                            const label = documentLabels[docId] || documents.find(d => d.id === docId)?.title || '資料を開く'
+                            const label = documentLabels[docId] || documents.find(d => d.id === docId)?.title || t('emailTemplates.openDocument')
                             return `<a href="#" style="display: inline-block; margin: 10px 5px; padding: 12px 24px; background-color: #0d6aeb; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">${escapeHtml(label)}</a>`
                           })
                           .join('')
                         return form.body_html
                           .replace(/\{\{name\}\}/g, '山田 太郎')
-                          .replace(/\{\{documentButtons\}\}/g, previewButtons || '<span style="color:#888;">紐づける資料を選択するとボタンが表示されます</span>')
+                          .replace(/\{\{documentButtons\}\}/g, previewButtons || `<span style="color:#888;">${t('emailTemplates.previewPlaceholder')}</span>`)
                       })()}
                       className="w-full border-0 bg-white"
                       style={{ minHeight: 480 }}
@@ -518,7 +520,7 @@ export default function EmailTemplatesTab() {
                   disabled={saving}
                   className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium disabled:opacity-50 transition-colors"
                 >
-                  {saving ? '保存中...' : '保存'}
+                  {saving ? t('emailTemplates.saving') : t('emailTemplates.save')}
                 </button>
                 <button
                   type="button"
@@ -526,7 +528,7 @@ export default function EmailTemplatesTab() {
                   disabled={saving}
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium disabled:opacity-50 transition-colors"
                 >
-                  {saving ? '登録確定中...' : '登録確定'}
+                  {saving ? t('emailTemplates.publishing') : t('emailTemplates.publish')}
                 </button>
                 {selected.is_published && (
                   <button
@@ -535,7 +537,7 @@ export default function EmailTemplatesTab() {
                     disabled={saving}
                     className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium disabled:opacity-50 transition-colors"
                   >
-                    やめる
+                    {t('emailTemplates.unpublish')}
                   </button>
                 )}
                 <button
@@ -543,11 +545,11 @@ export default function EmailTemplatesTab() {
                   onClick={handleCopyTemplate}
                   className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
                 >
-                  {copyFeedback ? 'コピー完了!' : 'コピー'}
+                  {copyFeedback ? t('emailTemplates.copyDone') : t('emailTemplates.copy')}
                 </button>
               </div>
               <p className="text-xs text-gray-500 -mt-2">
-                ※「保存」はドラフト保存、「登録確定」でフォームの選択肢に表示されます
+                {t('emailTemplates.footerHint')}
               </p>
             </form>
           )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback } from 'react'
 import type { Database } from '@/types/database.types'
+import { useAdminLocale } from '../context/AdminLocaleContext'
 
 type Lead = Database['public']['Tables']['leads']['Row']
 
@@ -44,24 +45,26 @@ export default function DetailModal({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleKeyDown])
 
+  const { t, getStatusLabel, locale } = useAdminLocale()
   if (!lead) return null
 
-  const fields: { label: string; value: string | null | undefined; copyable?: boolean }[] = [
-    { label: '受付日時', value: new Date(lead.created_at).toLocaleString('ja-JP') },
-    { label: '更新日時', value: lead.updated_at ? new Date(lead.updated_at).toLocaleString('ja-JP') : '-' },
-    { label: '名前', value: lead.name },
-    { label: 'カテゴリ', value: lead.category },
-    { label: '会社名', value: lead.company_name ?? '-' },
-    { label: 'メールアドレス', value: lead.email, copyable: true },
-    { label: '電話番号', value: lead.phone, copyable: true },
-    { label: '業界', value: lead.industry ?? '-' },
-    { label: 'ご希望資料', value: lead.requested_document ?? '-' },
-    { label: '役職', value: lead.position ?? '-' },
-    { label: '目的', value: lead.purpose ?? '-' },
-    { label: 'お悩み・関心', value: lead.concerns?.length ? lead.concerns.join('、') : '-' },
-    { label: 'Instagram ID', value: lead.instagram_id ?? '-' },
-    { label: 'ステータス', value: lead.status ?? '未対応' },
-    { label: '管理メモ', value: lead.memo ?? '-' },
+  const dateLocale = locale === 'ko' ? 'ko-KR' : 'ja-JP'
+  const fields: { labelKey: string; value: string | null | undefined; copyable?: boolean }[] = [
+    { labelKey: 'detailModal.receivedAt', value: new Date(lead.created_at).toLocaleString(dateLocale) },
+    { labelKey: 'detailModal.updatedAt', value: lead.updated_at ? new Date(lead.updated_at).toLocaleString(dateLocale) : '-' },
+    { labelKey: 'detailModal.name', value: lead.name },
+    { labelKey: 'detailModal.category', value: lead.category },
+    { labelKey: 'detailModal.company', value: lead.company_name ?? '-' },
+    { labelKey: 'detailModal.email', value: lead.email, copyable: true },
+    { labelKey: 'detailModal.phone', value: lead.phone, copyable: true },
+    { labelKey: 'detailModal.industry', value: lead.industry ?? '-' },
+    { labelKey: 'detailModal.requestedDocument', value: lead.requested_document ?? '-' },
+    { labelKey: 'detailModal.position', value: lead.position ?? '-' },
+    { labelKey: 'detailModal.purpose', value: lead.purpose ?? '-' },
+    { labelKey: 'detailModal.concerns', value: lead.concerns?.length ? lead.concerns.join('、') : '-' },
+    { labelKey: 'detailModal.instagramId', value: lead.instagram_id ?? '-' },
+    { labelKey: 'detailModal.status', value: getStatusLabel(lead.status ?? '未対応') },
+    { labelKey: 'detailModal.memo', value: lead.memo ?? '-' },
   ]
 
   return (
@@ -78,7 +81,7 @@ export default function DetailModal({
       >
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h2 id="modal-title" className="text-lg font-bold text-gray-900">
-            お問い合わせ詳細
+            {t('detailModal.title')}
           </h2>
           <div className="flex items-center gap-2">
             {hasPrev && (
@@ -89,9 +92,9 @@ export default function DetailModal({
                   onPrev?.()
                 }}
                 className="text-gray-600 hover:text-gray-900 p-1"
-                aria-label="前へ"
+                aria-label={t('detailModal.prev')}
               >
-                前へ
+                {t('detailModal.prev')}
               </button>
             )}
             {hasNext && (
@@ -102,25 +105,25 @@ export default function DetailModal({
                   onNext?.()
                 }}
                 className="text-gray-600 hover:text-gray-900 p-1"
-                aria-label="次へ"
+                aria-label={t('detailModal.next')}
               >
-                次へ
+                {t('detailModal.next')}
               </button>
             )}
             <button
               type="button"
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
-              aria-label="閉じる"
+              aria-label={t('detailModal.close')}
             >
               &times;
             </button>
           </div>
         </div>
         <div className="px-6 py-4 space-y-3">
-          {fields.map(({ label, value, copyable }) => (
-            <div key={label} className="text-sm">
-              <div className="font-medium text-gray-700 mb-0.5">{label}</div>
+          {fields.map(({ labelKey, value, copyable }) => (
+            <div key={labelKey} className="text-sm">
+              <div className="font-medium text-gray-700 mb-0.5">{t(labelKey)}</div>
               <div className="text-gray-900 flex items-center gap-2">
                 <span className="break-all">{value ?? '-'}</span>
                 {copyable && value && (
@@ -129,7 +132,7 @@ export default function DetailModal({
                     onClick={() => copyToClipboard(value)}
                     className="text-blue-600 hover:underline text-xs shrink-0"
                   >
-                    コピー
+                    {t('detailModal.copy')}
                   </button>
                 )}
               </div>

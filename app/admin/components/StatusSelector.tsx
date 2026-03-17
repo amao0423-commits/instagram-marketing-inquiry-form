@@ -1,15 +1,16 @@
 'use client'
 
 import type { Database } from '@/types/database.types'
+import { useAdminLocale } from '../context/AdminLocaleContext'
 
 type Lead = Database['public']['Tables']['leads']['Row']
 
-const STATUS_OPTIONS: { value: string; label: string; className: string }[] = [
-  { value: '未対応', label: '未対応', className: 'bg-gray-100 text-gray-800' },
-  { value: '対応中', label: '対応中', className: 'bg-yellow-100 text-yellow-800' },
-  { value: '対応完了', label: '対応完了', className: 'bg-green-100 text-green-800' },
-  { value: '要フォローアップ', label: '要フォローアップ', className: 'bg-red-100 text-red-800' },
-  { value: 'キャンセル', label: 'キャンセル', className: 'bg-gray-200 text-gray-700' },
+const STATUS_OPTIONS: { value: string; className: string }[] = [
+  { value: '未対応', className: 'bg-gray-100 text-gray-800' },
+  { value: '対応中', className: 'bg-yellow-100 text-yellow-800' },
+  { value: '対応完了', className: 'bg-green-100 text-green-800' },
+  { value: '要フォローアップ', className: 'bg-red-100 text-red-800' },
+  { value: 'キャンセル', className: 'bg-gray-200 text-gray-700' },
 ]
 
 export function getStatusClass(status: string): string {
@@ -23,6 +24,7 @@ interface StatusSelectorProps {
 }
 
 export default function StatusSelector({ lead, onUpdate }: StatusSelectorProps) {
+  const { getStatusLabel } = useAdminLocale()
   const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value
     const res = await fetch(`/api/leads/${lead.id}`, {
@@ -46,7 +48,7 @@ export default function StatusSelector({ lead, onUpdate }: StatusSelectorProps) 
     >
       {STATUS_OPTIONS.map((opt) => (
         <option key={opt.value} value={opt.value}>
-          {opt.label}
+          {getStatusLabel(opt.value)}
         </option>
       ))}
     </select>

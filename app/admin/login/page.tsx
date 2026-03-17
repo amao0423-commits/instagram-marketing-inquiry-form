@@ -3,9 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useAdminLocale } from '../context/AdminLocaleContext'
+import LanguageSwitcher from '../components/LanguageSwitcher'
 
 export default function AdminLoginPage() {
   const router = useRouter()
+  const { t } = useAdminLocale()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -24,14 +27,14 @@ export default function AdminLoginPage() {
       const text = await res.text()
       const data = text ? (() => { try { return JSON.parse(text) } catch { return {} } })() : {}
       if (!res.ok) {
-        setError(data.message ?? 'ログインに失敗しました')
+        setError(data.message ?? t('login.failed'))
         setLoading(false)
         return
       }
       router.push('/admin')
       router.refresh()
     } catch {
-      setError('サーバーエラーが発生しました')
+      setError(t('login.serverError'))
       setLoading(false)
     }
   }
@@ -39,7 +42,10 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-sm border border-gray-200 rounded-lg shadow-sm p-8">
-        <h1 className="text-xl font-bold text-gray-900 mb-6 text-center">管理者ログイン</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-xl font-bold text-gray-900 text-center flex-1">{t('login.title')}</h1>
+          <LanguageSwitcher />
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2">
@@ -48,7 +54,7 @@ export default function AdminLoginPage() {
           )}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              メールアドレス
+              {t('login.email')}
             </label>
             <input
               id="email"
@@ -62,7 +68,7 @@ export default function AdminLoginPage() {
           </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              パスワード
+              {t('login.password')}
             </label>
             <input
               id="password"
@@ -79,12 +85,12 @@ export default function AdminLoginPage() {
             disabled={loading}
             className="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'ログイン中...' : 'ログイン'}
+            {loading ? t('login.submitting') : t('login.submit')}
           </button>
         </form>
         <p className="mt-6 text-center text-sm text-gray-500">
           <Link href="/" className="text-blue-600 hover:underline">
-            トップへ戻る
+            {t('login.backToTop')}
           </Link>
         </p>
       </div>
