@@ -64,33 +64,49 @@ export default function AdminDocumentsPage() {
     setMessage(null)
 
     try {
-      const formData = new FormData()
-      formData.append('file', selectedFile)
-
-      const uploadRes = await fetch('/api/admin/documents/upload', {
+      // ステップ1: ファイル本体は送らずメタ情報だけで署名付きURLを取得
+      const urlRes = await fetch('/api/admin/documents/upload-url', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: formData,
+        body: JSON.stringify({
+          file_name: selectedFile.name,
+          file_size: selectedFile.size,
+          file_type: selectedFile.type,
+        }),
       })
 
-      if (!uploadRes.ok) {
-        const errorData = await uploadRes.json().catch(() => ({}))
-        setMessage({ type: 'error', text: errorData.message ?? 'アップロードに失敗しました' })
+      if (!urlRes.ok) {
+        const errorData = await urlRes.json().catch(() => ({}))
+        setMessage({ type: 'error', text: errorData.message ?? 'アップロードの準備に失敗しました' })
         return
       }
 
-      const uploadData = await uploadRes.json()
+      const { upload_url, download_url, file_name, file_size, file_type } = await urlRes.json()
 
+      // ステップ2: ブラウザから Supabase Storage へ直接アップロード（Vercelを経由しない）
+      const putRes = await fetch(upload_url, {
+        method: 'PUT',
+        body: selectedFile,
+        headers: { 'Content-Type': selectedFile.type },
+      })
+
+      if (!putRes.ok) {
+        setMessage({ type: 'error', text: 'ファイルのアップロードに失敗しました' })
+        return
+      }
+
+      // ステップ3: 資料レコードを登録
       const createRes = await fetch('/api/admin/documents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           title: uploadTitle.trim(),
-          download_url: uploadData.download_url,
-          file_name: uploadData.file_name,
-          file_size: uploadData.file_size,
-          file_type: uploadData.file_type,
+          download_url,
+          file_name,
+          file_size,
+          file_type,
         }),
       })
 
