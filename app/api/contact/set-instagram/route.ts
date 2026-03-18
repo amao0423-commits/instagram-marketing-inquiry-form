@@ -1,3 +1,18 @@
+/**
+ * 無料アカウント診断（account-check）から Instagram ID を受け取り、該当リードに保存する API。
+ *
+ * 診断ツール側で以下①②を満たせば、この API は正常に受け取れます。
+ *
+ * ① 送信内容
+ *    - Content-Type: application/json
+ *    - body: JSON で { "ref": "Thanks から渡した ref", "instagram_id": "入力されたID" }
+ *    - ref / instagram_id は必須。クエリや Referer ではなく body で送ること。
+ *
+ * ② 送信先
+ *    - https://【この HP のドメイン】/api/contact/set-instagram
+ *    - 例: 本番が https://example.vercel.app なら
+ *      https://example.vercel.app/api/contact/set-instagram に POST。
+ */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getServerSupabase } from '@/lib/supabase-server'

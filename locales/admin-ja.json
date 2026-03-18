@@ -33,6 +33,7 @@
     "company": "会社名",
     "email": "メール",
     "phone": "電話",
+    "instagramId": "Instagram ID",
     "status": "ステータス",
     "memo": "メモ",
     "noLeads": "該当するお問い合わせがありません",
@@ -167,7 +168,8 @@
     "concerns": "お悩み・関心",
     "instagramId": "Instagram ID",
     "status": "ステータス",
-    "memo": "管理メモ"
+    "memo": "管理メモ",
+    "editMemo": "メモを編集"
   },
   "memoEditor": {
     "title": "管理メモの編集",

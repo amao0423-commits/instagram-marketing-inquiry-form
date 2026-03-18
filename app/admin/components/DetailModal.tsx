@@ -14,6 +14,7 @@ interface DetailModalProps {
   onNext?: () => void
   hasPrev: boolean
   hasNext: boolean
+  onEditMemo?: (lead: Lead) => void
 }
 
 function copyToClipboard(text: string) {
@@ -30,6 +31,7 @@ export default function DetailModal({
   onNext,
   hasPrev,
   hasNext,
+  onEditMemo,
 }: DetailModalProps) {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -124,7 +126,7 @@ export default function DetailModal({
           {fields.map(({ labelKey, value, copyable }) => (
             <div key={labelKey} className="text-sm">
               <div className="font-medium text-gray-700 mb-0.5">{t(labelKey)}</div>
-              <div className="text-gray-900 flex items-center gap-2">
+              <div className="text-gray-900 flex items-center gap-2 flex-wrap">
                 <span className="break-all">{value ?? '-'}</span>
                 {copyable && value && (
                   <button
@@ -133,6 +135,18 @@ export default function DetailModal({
                     className="text-blue-600 hover:underline text-xs shrink-0"
                   >
                     {t('detailModal.copy')}
+                  </button>
+                )}
+                {labelKey === 'detailModal.memo' && onEditMemo && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onEditMemo(lead)
+                    }}
+                    className="text-blue-600 hover:underline text-xs shrink-0"
+                  >
+                    {t('detailModal.editMemo')}
                   </button>
                 )}
               </div>

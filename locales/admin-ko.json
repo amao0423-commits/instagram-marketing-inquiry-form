@@ -33,6 +33,7 @@
     "company": "회사명",
     "email": "이메일",
     "phone": "전화",
+    "instagramId": "Instagram ID",
     "status": "상태",
     "memo": "메모",
     "noLeads": "해당하는 문의가 없습니다",
@@ -167,7 +168,8 @@
     "concerns": "고민·관심사",
     "instagramId": "Instagram ID",
     "status": "상태",
-    "memo": "관리 메모"
+    "memo": "관리 메모",
+    "editMemo": "메모 편집"
   },
   "memoEditor": {
     "title": "관리 메모 편집",

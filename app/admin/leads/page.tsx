@@ -240,8 +240,8 @@ export default function AdminLeadsPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.company')}</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.email')}</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.phone')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.instagramId')}</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.status')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">{t('leads.memo')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -270,24 +270,12 @@ export default function AdminLeadsPage() {
                       <td className="px-4 py-3 text-sm text-gray-900">{lead.company_name ?? '-'}</td>
                       <td className="px-4 py-3 text-sm text-gray-900">{lead.email}</td>
                       <td className="px-4 py-3 text-sm text-gray-900">{lead.phone}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{lead.instagram_id ?? '—'}</td>
                       <td className="px-4 py-3 text-sm" onClick={(e) => e.stopPropagation()}>
                         <StatusSelector
                           lead={lead}
                           onUpdate={handleLeadUpdate}
                         />
-                      </td>
-                      <td className="px-4 py-3 text-sm" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setMemoLead(lead)
-                          }}
-                          className="text-left text-gray-600 hover:text-blue-600 max-w-[120px] truncate block"
-                          title={lead.memo ?? 'メモを追加'}
-                        >
-                          {lead.memo ? lead.memo.slice(0, 20) + (lead.memo.length > 20 ? '...' : '') : '—'}
-                        </button>
                       </td>
                     </tr>
                   ))
@@ -335,6 +323,7 @@ export default function AdminLeadsPage() {
           onNext={hasNext ? () => setDetailLead(filteredLeads[detailIndex + 1]) : undefined}
           hasPrev={hasPrev}
           hasNext={hasNext}
+          onEditMemo={(l) => setMemoLead(l)}
         />
       )}
 
